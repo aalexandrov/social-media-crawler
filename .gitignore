@@ -1,1 +1,7 @@
+# ignore compiled python files
+*.pyc
+# ignore vendor libs
 vendor/python-twitter
+vendor/python-oauth2
+vendor/httplib2
+vendor/simplejson

@@ -3,4 +3,6 @@
 #
 
 hg		python-twitter	http://python-twitter.googlecode.com/hg/ 
-
+git		python-oauth2	git@github.com:simplegeo/python-oauth2.git
+hg 		httplib2 		https://code.google.com/p/httplib2/
+git		simplejson		https://github.com/simplejson/simplejson
