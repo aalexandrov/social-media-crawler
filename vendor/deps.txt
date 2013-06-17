@@ -1,0 +1,6 @@
+################################################################
+# Type	Name			Location
+#
+
+hg		python-twitter	http://python-twitter.googlecode.com/hg/ 
+
