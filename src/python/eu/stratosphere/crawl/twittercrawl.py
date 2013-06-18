@@ -12,16 +12,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-Created on Oct 14, 2011
+Created on Jun 18, 2013
 
 @author: Alexander Alexandrov <alexander.alexandrov@tu-berlin.de>
 '''
 
 from subprocess import Popen, PIPE
 from re import sub
-from eu.stratosphere.crawl.common import AbstractTask
+from eu.stratosphere.common import AbstractTask
 
 import twitter
+from eu.stratosphere.error import InvalidSettingsError
 
 TASK_PREFIX = "twitter"
 
@@ -46,8 +47,12 @@ Constructor
 #                           default=None, help="path to the compiled XML prototype file (defaults to `${config-dir}/${dgen-name}-prototype.xml`)")
         return parser
         
-    def _fixArgs(self, args):
-        super(CrawlTask, self)._fixArgs(args)
+    def _validateAndFixArgs(self, args):
+        super(CrawlTask, self)._validateAndFixArgs(args)
+        
+        missingArgsKeys = set(['twitter_consumer_secret', 'twitter_access_token_key', 'twitter_access_token_secret']) - set(filter(None, args.__dict__.keys()))
+        if len(missingArgsKeys) > 0:
+            raise InvalidSettingsError(self.qname(), list(missingArgsKeys)) 
         
     def _do(self, args):
         self._log.info("Crawling tweets...")

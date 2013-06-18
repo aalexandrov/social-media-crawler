@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  
-Created on Oct 14, 2011
+Created on Jun 18, 2013
 
 @author: Alexander Alexandrov <alexander.alexandrov@tu-berlin.de>
 '''
@@ -26,6 +26,8 @@ import types
 import ConfigParser
 import os.path
 import re
+from eu.stratosphere.util.properties import Properties
+from eu.stratosphere.error import UninitializedProjectError
 
 TASK_PREFIX = "abstract"
 
@@ -202,8 +204,8 @@ class AbstractTask(object):
         parser = self.argsParser()
         args = parser.parse_args(argv)[0]
 
-        # fix the parsed arguments
-        self._fixArgs(args)
+        # validate and fix the parsed arguments
+        self._validateAndFixArgs(args)
 
         # perform the task, throws a TaskExecutionException on error 
         try:
@@ -217,26 +219,24 @@ class AbstractTask(object):
             self._log.error(e)
             raise e
         
-    def _fixArgs(self, args):
+    def _validateAndFixArgs(self, args):
         args.base_path = self.__basePath
         
         if (self._requiresProjectSettings()):
             
             # try to add the .crawler-settings contents to the list of args
-            projectPath = os.path.realpath("%s/.." % (args.base_path))
-            settingsPath = "%s/.crawler-settings" % (projectPath)
+            settingsPath = "%s/.crawler-settings" % (args.base_path)
             
-#             if (os.path.exists(myriadSettingsPath)):
-#                 p = myriad.util.properties.Properties();
-#                 p.load(open(myriadSettingsPath))
-#                 
-#                # add extra args from the .myriad-settings file
-#                 args.dgen_name = p.getProperty("MYRIAD_DGEN_NAME");
-#                 args.dgen_ns = p.getProperty("MYRIAD_DGEN_NS");
-#                 args.oligos_cp = p.getProperty("MYRIAD_OLIGOS_CP")
-#                 args.is_arch64 = p.getProperty("MYRIAD_IS_ARCH64").lower() == 'true'
-#             else:
-#                 raise myriad.error.UninitializedProjectError(myriadProjectPath)
+            if (os.path.exists(settingsPath)):
+                p = Properties();
+                p.load(open(settingsPath))
+                
+                # add extra args from the .crawler-settings file
+                for (k, v) in p.getPropertyDict().iteritems():
+                    if v is not None:
+                        setattr(args, k.lower(), v)
+            else:
+                raise UninitializedProjectError(args.base_path)
                 
             
     def _requiresProjectSettings(self):
@@ -249,7 +249,7 @@ class AbstractTask(object):
     def readPassword(option, opt, value, parser, *args, **kwargs):
         try:
             password = getpass.getpass(kwargs.get('prompt', "Password: "))
-        except (getpass.GetPassWarning), e:
+        except (getpass.GetPassWarning):
             raise optparse.OptionValueError("can't read password from input")
         setattr(parser.values, option.dest, password)
 

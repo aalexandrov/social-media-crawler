@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  
-Created on Oct 14, 2011
+Created on Jun 18, 2013
 
 @author: Alexander Alexandrov <alexander.alexandrov@tu-berlin.de>
 '''
@@ -64,7 +64,7 @@ class Frontend(object):
     __log = None
     
     # assistant version
-    VERSION = "0.3.0"
+    VERSION = "0.1.0"
     
     def __init__(self, basePath, fileName, argv):
         '''
@@ -140,6 +140,11 @@ class Frontend(object):
                     self.__printHeader()
                     self.__printErrorLine(str(e), sys.stderr)
                     self.__printTaskHelp(task)
+                # thrown if the enclosing project is not initialized
+                except eu.stratosphere.error.AbstractError, e:
+                    self.__printHeader()
+                    self.__printErrorLine(str(e), sys.stderr)
+                    self.__printTaskHelp(task)
                 
         except:
             e = sys.exc_info()[1]
@@ -163,7 +168,7 @@ class Frontend(object):
         return self.__basePath
 
     def __printHeader(self, out=sys.stdout):
-        print >> out, "Myriad Assistant Tool"
+        print >> out, "Social Media Crawler"
         print >> out, "Version %s" % (self.VERSION)
         print >> out, ""
         
@@ -212,7 +217,7 @@ class Frontend(object):
 
 
 '''
-Created on Jun 17, 2013
+Created on Jun 18, 2013
 
 @author: alexander
 '''
