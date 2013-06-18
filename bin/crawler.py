@@ -30,9 +30,9 @@ except:
 basePath = os.path.dirname(os.path.dirname((os.path.abspath(fileName))))
 sys.path.append("%s/src/python" % (basePath))
 
-for name in os.listdir("%s/vendor" % (basePath)):
-    if os.path.isdir(os.path.join("%s/vendor" % (basePath), name)):
-        sys.path.append(os.path.join("%s/vendor" % (basePath), name))
+#for name in os.listdir("%s/vendor" % (basePath)):
+#    if os.path.isdir(os.path.join("%s/vendor" % (basePath), name)):
+#        sys.path.append(os.path.join("%s/vendor" % (basePath), name))
 
 from eu.stratosphere.frontend import Frontend
 

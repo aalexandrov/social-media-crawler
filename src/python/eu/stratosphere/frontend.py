@@ -21,8 +21,7 @@ Created on Jun 18, 2013
 import logging.config
 import optparse
 import sys
-
-import eu.stratosphere.crawl.twittercrawl
+import eu.stratosphere.crawl.twitter.task
 
 class UnknownTaskException(Exception):
     '''
@@ -84,7 +83,8 @@ class Frontend(object):
 
         try:
             # register `compile:*` tasks
-            self.registerTask(eu.stratosphere.crawl.twittercrawl.CrawlTask(self))
+            self.registerTask(eu.stratosphere.crawl.twitter.task.AuthTask(self))
+            self.registerTask(eu.stratosphere.crawl.twitter.task.CrawlFilterTask(self))
             
             if len(argv) == 2 and argv[0] == "help":
                 self.__isTaskHelp = True
