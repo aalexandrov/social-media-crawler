@@ -2,8 +2,3 @@
 *.pyc
 # ignore project settings file
 .crawler-settings
-# ignore vendor libs
-vendor/python-twitter
-vendor/python-oauth2
-vendor/httplib2
-vendor/simplejson
