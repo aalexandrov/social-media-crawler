@@ -30,11 +30,11 @@ class TwitterPrintStreamer(TwythonStreamer):
     
     EPOCH_SIZE = 1000
     
-    def __init__(self, name, log, wfile_path, app_key, app_secret, oauth_token, oauth_token_secret, timeout=300, retry_count=None, retry_in=10, headers=None):
+    def __init__(self, name, log, wfile, app_key, app_secret, oauth_token, oauth_token_secret, timeout=300, retry_count=None, retry_in=10, headers=None):
         super(TwitterPrintStreamer, self).__init__(app_key, app_secret, oauth_token, oauth_token_secret, timeout, retry_count, retry_in, headers)
         self._name = name
         self._log = log
-        self._wfile = open(wfile_path, "a")
+        self._wfile = wfile
         self._currEpochStart = datetime.datetime.now().replace(microsecond=0)
         self._count = 0
     
