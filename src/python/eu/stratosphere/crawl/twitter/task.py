@@ -21,9 +21,10 @@ from eu.stratosphere.common import AbstractTask
 from eu.stratosphere.crawl.twitter.auth import OAuthWorkflow
 from eu.stratosphere.crawl.twitter.stream import TwitterPrintStreamer
 
-import signal
 import bz2
+import signal
 import sets
+import threading
 
 TASK_PREFIX = "twitter"
 
@@ -68,6 +69,10 @@ class AbstractCrawlTask(AbstractTask):
         parser.add_argument("--name", metavar="NAME", dest="stream_name", type="str",
                             help="Name of this stream")
         # options
+        parser.add_option("--duration", metavar="SECS", dest="duration", type="int", 
+                              default=0, help="Close stream after X seconds.")
+        parser.add_option("--output-dir", metavar="DIR", dest="output_dir", type="str", 
+                              default=".", help="Use Custom output directory.")
         parser.add_option("--compress", metavar="BOOL", dest="compress", action="store_true", 
                               default=False, help="BZip2 the output.")
         parser.add_option("--stall-warnings", metavar="BOOL", dest="stall_warnings", action="store_true",
@@ -101,9 +106,9 @@ class AbstractCrawlTask(AbstractTask):
         
         # create print streamer object
         if args.compress:
-            wfile = bz2.BZ2File("%s/%s.stream.bz2" % (args.base_path, args.stream_name), "w", 64*1024, 9)
+            wfile = bz2.BZ2File("%s/%s.stream.bz2" % (args.output_dir, args.stream_name), "w", 64*1024, 9)
         else:
-            wfile = open("%s/%s.stream" % (args.base_path, args.stream_name), "w")
+            wfile = open("%s/%s.stream" % (args.output_dir, args.stream_name), "w")
         stream = TwitterPrintStreamer(args.stream_name, 
                                       self._log, 
                                       wfile, 
@@ -115,8 +120,25 @@ class AbstractCrawlTask(AbstractTask):
         # register shutdown signal handler
         signal.signal(signal.SIGINT, lambda signal, frame: stream.disconnect())
         
-        # configure the stream params and start consuming the stream
-        self._startStream(stream, self._configureParams(args, dict()))
+        if (args.duration > 0):
+            # create an interruptable thread to run the stream
+            class InterruptableThread(threading.Thread):
+                def __init__(self, task):
+                    threading.Thread.__init__(self)
+                    self.task = task
+                def run(self):
+                    self.task._startStream(stream, self.task._configureParams(args, dict()))
+            
+            # start the runner thread
+            runner = InterruptableThread(self)
+            runner.start()
+            
+            # disconnect after join timeout
+            runner.join(args.duration)
+            stream.disconnect()
+        else:
+            # merely configure the stream params and start consuming the stream
+            self._startStream(stream, self._configureParams(args, dict()))
 
     def _startStream(self, stream, params):
         '''

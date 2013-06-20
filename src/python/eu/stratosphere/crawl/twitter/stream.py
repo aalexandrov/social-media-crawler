@@ -44,7 +44,7 @@ class TwitterPrintStreamer(TwythonStreamer):
         if (self._count % TwitterPrintStreamer.EPOCH_SIZE == 0):
             oldEpochStart = self._currEpochStart 
             self._currEpochStart = datetime.datetime.now().replace(microsecond=0)
-            self._log.info("Connected next batch of %d tweets in %s seconds." % (TwitterPrintStreamer.EPOCH_SIZE, self._currEpochStart - oldEpochStart))
+            self._log.info("Collected next batch of %d tweets in %s seconds." % (TwitterPrintStreamer.EPOCH_SIZE, self._currEpochStart - oldEpochStart))
 
     def on_timeout(self):
         self._log.warn("Timeout in twitter stream %s." % (self._name))
