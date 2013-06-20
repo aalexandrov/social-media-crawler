@@ -85,6 +85,7 @@ class Frontend(object):
             # register `compile:*` tasks
             self.registerTask(eu.stratosphere.crawl.twitter.task.AuthTask(self))
             self.registerTask(eu.stratosphere.crawl.twitter.task.CrawlFilterTask(self))
+            self.registerTask(eu.stratosphere.crawl.twitter.task.CrawlSampleTask(self))
             
             if len(argv) == 2 and argv[0] == "help":
                 self.__isTaskHelp = True
@@ -214,25 +215,3 @@ class Frontend(object):
         print >> out, "".join(parser.formatDescription())
         print >> out, "".join(parser.formatArgsHelp())
         print >> out, "".join(parser.formatOptionsHelp())
-
-
-'''
-Created on Jun 18, 2013
-
-@author: alexander
-'''
-
-class AbstractCrawler(object):
-    '''
-    classdocs
-    '''
-
-
-    def __init__(self, *args, **kwargs):
-        '''
-        Constructor
-        '''
-    
-    def crawl(self):
-        pass
-        

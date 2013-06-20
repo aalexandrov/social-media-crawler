@@ -27,7 +27,8 @@ import ConfigParser
 import os.path
 import re
 from eu.stratosphere.util.properties import Properties
-from eu.stratosphere.error import UninitializedProjectError
+from eu.stratosphere.error import UninitializedProjectError, InvalidSettingsError
+import sets
 
 TASK_PREFIX = "abstract"
 
@@ -87,8 +88,11 @@ class TaskOptions(optparse.OptionParser):
         lines = [formatter.format_option(opt) for opt in self.args_list]
         formatter.dedent()
         
-        return [ formatter.format_heading("Arguments") ] + lines
-
+        if len(self.args_list) > 0: 
+            return [ formatter.format_heading("Arguments") ] + lines
+        else:
+            return []
+        
     def formatOptionsHelp(self):
         formatter = optparse.IndentedHelpFormatter(width=80)
 
@@ -235,12 +239,25 @@ class AbstractTask(object):
                 for (k, v) in p.getPropertyDict().iteritems():
                     if v is not None:
                         setattr(args, k.lower(), v)
+                
+                # check if some of the configured required settings are missing
+                missingSettings = self._requiredSettingsKeys() - sets.Set(filter(None, args.__dict__.keys()))
+                if len(missingSettings) > 0:
+                    raise InvalidSettingsError(self.qname(), list(missingSettings))
             else:
                 raise UninitializedProjectError(args.base_path)
-                
             
     def _requiresProjectSettings(self):
+        '''
+        Indicates that the task depends on the .crawler-settings file. 
+        '''
         return True
+
+    def _requiredSettingsKeys(self):
+        '''
+        Configure the required settings keys. 
+        '''
+        return sets.Set([])
 
     def _do(self, args):
         print args
